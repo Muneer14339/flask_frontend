@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "134573180968",
+    "project_id": "pulse-rifle-app",
+    "storage_bucket": "pulse-rifle-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:134573180968:android:a87e52287b0fc9309f8d1d",
+        "android_client_info": {
+          "package_name": "com.example.rt_tiltcant_accgyro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "134573180968-trumaajq99q3an115h1lng88l774k8mr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rt_tiltcant_accgyro",
+            "certificate_hash": "c5c61e7fa045d057a4c76a910166c9553a4e6e2b"
+          }
+        },
+        {
+          "client_id": "134573180968-fm8l1n7d5vaimovtfuncm9e0qsi36ikj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyTOvLnDa7rJ24zAhNojywe76qE7T4E5M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "134573180968-fm8l1n7d5vaimovtfuncm9e0qsi36ikj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "134573180968-tk62qkmh1ku8sk3htjt3jjev4kpnnpdj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.rtTiltcantAccgyro"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
