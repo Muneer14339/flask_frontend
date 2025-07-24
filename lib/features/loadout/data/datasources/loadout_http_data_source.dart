@@ -543,23 +543,3 @@ class LoadoutHttpDataSourceImpl implements LoadoutHttpDataSource {
 // JSON conversion helpers for models
 }
 
-// Extension to add JSON conversion to models
-extension RifleModelJson on RifleModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static RifleModel fromJson(Map<String, dynamic> json) => RifleModel.fromFirestore(json, json['id'] ?? '');
-}
-
-extension AmmunitionModelJson on AmmunitionModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static AmmunitionModel fromJson(Map<String, dynamic> json) => AmmunitionModel.fromFirestore(json, json['id'] ?? '');
-}
-
-extension ScopeModelJson on ScopeModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static ScopeModel fromJson(Map<String, dynamic> json) => ScopeModel.fromFirestore(json, json['id'] ?? '');
-}
-
-extension MaintenanceModelJson on MaintenanceModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static MaintenanceModel fromJson(Map<String, dynamic> json) => MaintenanceModel.fromFirestore(json, json['id'] ?? '');
-}

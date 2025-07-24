@@ -1,3 +1,4 @@
+// lib/features/loadout/data/repositories/loadout_repository_impl.dart
 import 'package:dartz/dartz.dart';
 import 'dart:async';
 
@@ -7,23 +8,22 @@ import '../../domain/entities/ammunition.dart';
 import '../../domain/entities/scope.dart';
 import '../../domain/entities/maintenance.dart';
 import '../../domain/repositories/loadout_repository.dart';
-import '../datasources/loadout_firebase_data_source.dart';
+import '../datasources/loadout_http_data_source.dart';
 import '../models/rifle_model.dart';
 import '../models/ammunition_model.dart';
 import '../models/scope_model.dart';
 import '../models/maintenance_model.dart';
 
-class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
-  final LoadoutFirebaseDataSource firebaseDataSource;
+class LoadoutRepositoryImpl implements LoadoutRepository {
+  final LoadoutHttpDataSource httpDataSource;
 
-  LoadoutFirebaseRepositoryImpl({required this.firebaseDataSource});
+  LoadoutRepositoryImpl({required this.httpDataSource});
 
   @override
   Future<Either<Failure, List<Rifle>>> getRifles() async {
     try {
-      // Get current snapshot for immediate response
-      final riflesSnapshot = await firebaseDataSource.getRiflesStream().first;
-      final rifles = riflesSnapshot.map((model) => model.toEntity()).toList();
+      final rifleModels = await httpDataSource.getRifles();
+      final rifles = rifleModels.map((model) => model.toEntity()).toList();
       return Right(rifles);
     } catch (e) {
       return Left(DatabaseFailure('Failed to get rifles: $e'));
@@ -33,10 +33,8 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   @override
   Future<Either<Failure, List<Ammunition>>> getAmmunition() async {
     try {
-      final ammunitionSnapshot =
-          await firebaseDataSource.getAmmunitionStream().first;
-      final ammunition =
-          ammunitionSnapshot.map((model) => model.toEntity()).toList();
+      final ammunitionModels = await httpDataSource.getAmmunition();
+      final ammunition = ammunitionModels.map((model) => model.toEntity()).toList();
       return Right(ammunition);
     } catch (e) {
       return Left(DatabaseFailure('Failed to get ammunition: $e'));
@@ -46,8 +44,8 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   @override
   Future<Either<Failure, List<Scope>>> getScopes() async {
     try {
-      final scopesSnapshot = await firebaseDataSource.getScopesStream().first;
-      final scopes = scopesSnapshot.map((model) => model.toEntity()).toList();
+      final scopeModels = await httpDataSource.getScopes();
+      final scopes = scopeModels.map((model) => model.toEntity()).toList();
       return Right(scopes);
     } catch (e) {
       return Left(DatabaseFailure('Failed to get scopes: $e'));
@@ -57,10 +55,8 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   @override
   Future<Either<Failure, List<Maintenance>>> getMaintenance() async {
     try {
-      final maintenanceSnapshot =
-          await firebaseDataSource.getMaintenanceStream().first;
-      final maintenance =
-          maintenanceSnapshot.map((model) => model.toEntity()).toList();
+      final maintenanceModels = await httpDataSource.getMaintenance();
+      final maintenance = maintenanceModels.map((model) => model.toEntity()).toList();
       return Right(maintenance);
     } catch (e) {
       return Left(DatabaseFailure('Failed to get maintenance: $e'));
@@ -71,7 +67,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   Future<Either<Failure, void>> addRifle(Rifle rifle) async {
     try {
       final model = RifleModel.fromEntity(rifle);
-      await firebaseDataSource.addRifle(model);
+      await httpDataSource.addRifle(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to add rifle: $e'));
@@ -82,7 +78,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   Future<Either<Failure, void>> addAmmunition(Ammunition ammunition) async {
     try {
       final model = AmmunitionModel.fromEntity(ammunition);
-      await firebaseDataSource.addAmmunition(model);
+      await httpDataSource.addAmmunition(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to add ammunition: $e'));
@@ -93,7 +89,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   Future<Either<Failure, void>> addScope(Scope scope) async {
     try {
       final model = ScopeModel.fromEntity(scope);
-      await firebaseDataSource.addScope(model);
+      await httpDataSource.addScope(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to add scope: $e'));
@@ -104,7 +100,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   Future<Either<Failure, void>> addMaintenance(Maintenance maintenance) async {
     try {
       final model = MaintenanceModel.fromEntity(maintenance);
-      await firebaseDataSource.addMaintenance(model);
+      await httpDataSource.addMaintenance(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to add maintenance: $e'));
@@ -115,7 +111,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   Future<Either<Failure, void>> updateRifle(Rifle rifle) async {
     try {
       final model = RifleModel.fromEntity(rifle);
-      await firebaseDataSource.updateRifle(model);
+      await httpDataSource.updateRifle(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to update rifle: $e'));
@@ -126,7 +122,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   Future<Either<Failure, void>> updateAmmunition(Ammunition ammunition) async {
     try {
       final model = AmmunitionModel.fromEntity(ammunition);
-      await firebaseDataSource.updateAmmunition(model);
+      await httpDataSource.updateAmmunition(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to update ammunition: $e'));
@@ -137,7 +133,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   Future<Either<Failure, void>> updateScope(Scope scope) async {
     try {
       final model = ScopeModel.fromEntity(scope);
-      await firebaseDataSource.updateScope(model);
+      await httpDataSource.updateScope(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to update scope: $e'));
@@ -147,7 +143,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   @override
   Future<Either<Failure, void>> deleteAmmunition(String id) async {
     try {
-      await firebaseDataSource.deleteAmmunition(id);
+      await httpDataSource.deleteAmmunition(id);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to delete ammunition: $e'));
@@ -157,7 +153,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   @override
   Future<Either<Failure, void>> completeMaintenance(String id) async {
     try {
-      await firebaseDataSource.completeMaintenance(id);
+      await httpDataSource.completeMaintenance(id);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to complete maintenance: $e'));
@@ -167,7 +163,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   @override
   Future<Either<Failure, void>> setActiveRifle(String rifleId) async {
     try {
-      await firebaseDataSource.setActiveRifle(rifleId);
+      await httpDataSource.setActiveRifle(rifleId);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to set active rifle: $e'));
@@ -177,7 +173,7 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
   @override
   Future<Either<Failure, Rifle?>> getActiveRifle() async {
     try {
-      final activeRifleModel = await firebaseDataSource.getActiveRifle();
+      final activeRifleModel = await httpDataSource.getActiveRifle();
       final activeRifle = activeRifleModel?.toEntity();
       return Right(activeRifle);
     } catch (e) {
@@ -185,9 +181,30 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
     }
   }
 
-  // Stream methods for real-time updates
+  @override
+  Future<Either<Failure, void>> deleteMaintenance(String id) async {
+    try {
+      await httpDataSource.deleteMaintenance(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(DatabaseFailure('Failed to delete maintenance: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteScope(String id) async {
+    try {
+      await httpDataSource.deleteScope(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(DatabaseFailure('Failed to delete scope: $e'));
+    }
+  }
+
+  // Stream methods for real-time updates (HTTP polling)
+  @override
   Stream<Either<Failure, List<Rifle>>> getRiflesStream() {
-    return firebaseDataSource.getRiflesStream().map((rifleModels) {
+    return httpDataSource.getRiflesStream().map((rifleModels) {
       try {
         final rifles = rifleModels.map((model) => model.toEntity()).toList();
         return Right<Failure, List<Rifle>>(rifles);
@@ -201,11 +218,12 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
     });
   }
 
+  @override
   Stream<Either<Failure, List<Ammunition>>> getAmmunitionStream() {
-    return firebaseDataSource.getAmmunitionStream().map((ammunitionModels) {
+    return httpDataSource.getAmmunitionStream().map((ammunitionModels) {
       try {
         final ammunition =
-            ammunitionModels.map((model) => model.toEntity()).toList();
+        ammunitionModels.map((model) => model.toEntity()).toList();
         return Right<Failure, List<Ammunition>>(ammunition);
       } catch (e) {
         return Left<Failure, List<Ammunition>>(
@@ -217,8 +235,9 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
     });
   }
 
+  @override
   Stream<Either<Failure, List<Scope>>> getScopesStream() {
-    return firebaseDataSource.getScopesStream().map((scopeModels) {
+    return httpDataSource.getScopesStream().map((scopeModels) {
       try {
         final scopes = scopeModels.map((model) => model.toEntity()).toList();
         return Right<Failure, List<Scope>>(scopes);
@@ -232,11 +251,12 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
     });
   }
 
+  @override
   Stream<Either<Failure, List<Maintenance>>> getMaintenanceStream() {
-    return firebaseDataSource.getMaintenanceStream().map((maintenanceModels) {
+    return httpDataSource.getMaintenanceStream().map((maintenanceModels) {
       try {
         final maintenance =
-            maintenanceModels.map((model) => model.toEntity()).toList();
+        maintenanceModels.map((model) => model.toEntity()).toList();
         return Right<Failure, List<Maintenance>>(maintenance);
       } catch (e) {
         return Left<Failure, List<Maintenance>>(
@@ -246,25 +266,5 @@ class LoadoutFirebaseRepositoryImpl implements LoadoutRepository {
       return Left<Failure, List<Maintenance>>(
           DatabaseFailure('Stream error: $error'));
     });
-  }
-
-  @override
-  Future<Either<Failure, void>> deleteMaintenance(String id) async {
-    try {
-      await firebaseDataSource.deleteMaintenance(id);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Failed to delete maintenance: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> deleteScope(String id) async {
-    try {
-      await firebaseDataSource.deleteScope(id);
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Failed to delete maintenance: $e'));
-    }
   }
 }

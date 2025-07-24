@@ -1,89 +1,36 @@
-// lib/features/Loadout/data/models/rifle_model.dart
-import 'package:hive/hive.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/features/loadout/data/models/rifle_model.dart
 import '../../domain/entities/rifle.dart';
 import 'scope_model.dart';
 import 'ammunition_model.dart';
 
-// part 'rifle_model.g.dart';
+class RifleModel {
+  final String id;
+  final String name;
+  final String brand;
+  final String manufacturer;
+  final String generationVariant;
+  final String model;
+  final String caliber;
+  final BarrelModel barrel;
+  final ActionModel action;
+  final StockModel stock;
+  final ScopeModel? scope;
+  final AmmunitionModel? ammunition;
+  final bool isActive;
+  final String? notes;
 
-@HiveType(typeId: 0)
-class RifleModel extends HiveObject {
-  @HiveField(0)
-  String id;
-
-  @HiveField(1)
-  String name;
-
-  @HiveField(2)
-  String brand;
-
-  @HiveField(3)
-  String manufacturer;
-
-  @HiveField(4)
-  String generationVariant;
-
-  @HiveField(5)
-  String model;
-
-  @HiveField(6)
-  String caliber;
-
-  @HiveField(7)
-  BarrelModel barrel;
-
-  @HiveField(8)
-  ActionModel action;
-
-  @HiveField(9)
-  StockModel stock;
-
-  @HiveField(10)
-  ScopeModel? scope;
-
-  @HiveField(11)
-  AmmunitionModel? ammunition;
-
-  @HiveField(13)
-  bool isActive;
-
-  @HiveField(14)
-  String? notes;
-
-  // New advanced fields - starting from field 14
-  @HiveField(15)
-  String? serialNumber;
-
-  @HiveField(16)
-  String? overallLength;
-
-  @HiveField(17)
-  String? weight;
-
-  @HiveField(18)
-  String? capacity;
-
-  @HiveField(19)
-  String? finish;
-
-  @HiveField(20)
-  String? sightType;
-
-  @HiveField(21)
-  String? sightOptic;
-
-  @HiveField(22)
-  String? sightModel;
-
-  @HiveField(23)
-  String? sightHeight;
-
-  @HiveField(24)
-  String? purchaseDate;
-
-  @HiveField(25)
-  String? modifications;
+  // Advanced fields
+  final String? serialNumber;
+  final String? overallLength;
+  final String? weight;
+  final String? capacity;
+  final String? finish;
+  final String? sightType;
+  final String? sightOptic;
+  final String? sightModel;
+  final String? sightHeight;
+  final String? purchaseDate;
+  final String? modifications;
 
   RifleModel({
     required this.id,
@@ -100,7 +47,6 @@ class RifleModel extends HiveObject {
     this.ammunition,
     required this.isActive,
     this.notes,
-    // New advanced fields
     this.serialNumber,
     this.overallLength,
     this.weight,
@@ -130,7 +76,6 @@ class RifleModel extends HiveObject {
       ammunition: rifle.ammunition != null ? AmmunitionModel.fromEntity(rifle.ammunition!) : null,
       isActive: rifle.isActive,
       notes: rifle.notes,
-      // New advanced fields
       serialNumber: rifle.serialNumber,
       overallLength: rifle.overallLength,
       weight: rifle.weight,
@@ -145,54 +90,52 @@ class RifleModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore serialization methods
-  factory RifleModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory RifleModel.fromJson(Map<String, dynamic> json) {
     return RifleModel(
-      id: id,
-      name: data['name'] ?? '',
-      brand: data['brand'] ?? '',
-      manufacturer: data['manufacturer'] ?? '',
-      generationVariant: data['generationVariant;'] ?? '',
-      model: data['model'] ?? '',
-      caliber: data['caliber'] ?? '',
-      barrel: BarrelModel.fromFirestore(data['barrel'] ?? {}),
-      action: ActionModel.fromFirestore(data['action'] ?? {}),
-      stock: StockModel.fromFirestore(data['stock'] ?? {}),
-      scope: data['scope'] != null ? ScopeModel.fromFirestore(data['scope'], '') : null,
-      ammunition: data['ammunition'] != null ? AmmunitionModel.fromFirestore(data['ammunition'], '') : null,
-      isActive: data['isActive'] ?? false,
-      notes: data['notes'],
-      // New advanced fields
-      serialNumber: data['serialNumber'],
-      overallLength: data['overallLength'],
-      weight: data['weight'],
-      capacity: data['capacity'],
-      finish: data['finish'],
-      sightType: data['sightType'],
-      sightOptic: data['sightOptic'],
-      sightModel: data['sightModel'],
-      sightHeight: data['sightHeight'],
-      purchaseDate: data['purchaseDate'],
-      modifications: data['modifications'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      brand: json['brand'] ?? '',
+      manufacturer: json['manufacturer'] ?? '',
+      generationVariant: json['generationVariant'] ?? '',
+      model: json['model'] ?? '',
+      caliber: json['caliber'] ?? '',
+      barrel: BarrelModel.fromJson(json['barrel'] ?? {}),
+      action: ActionModel.fromJson(json['action'] ?? {}),
+      stock: StockModel.fromJson(json['stock'] ?? {}),
+      scope: json['scope'] != null ? ScopeModel.fromJson(json['scope']) : null,
+      ammunition: json['ammunition'] != null ? AmmunitionModel.fromJson(json['ammunition']) : null,
+      isActive: json['isActive'] ?? false,
+      notes: json['notes'],
+      serialNumber: json['serialNumber'],
+      overallLength: json['overallLength'],
+      weight: json['weight'],
+      capacity: json['capacity'],
+      finish: json['finish'],
+      sightType: json['sightType'],
+      sightOptic: json['sightOptic'],
+      sightModel: json['sightModel'],
+      sightHeight: json['sightHeight'],
+      purchaseDate: json['purchaseDate'],
+      modifications: json['modifications'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'brand': brand,
       'manufacturer': manufacturer,
-      'generationVariant;': generationVariant,
+      'generationVariant': generationVariant,
       'model': model,
       'caliber': caliber,
-      'barrel': barrel.toFirestore(),
-      'action': action.toFirestore(),
-      'stock': stock.toFirestore(),
-      'scope': scope?.toFirestore(),
-      'ammunition': ammunition?.toFirestore(),
+      'barrel': barrel.toJson(),
+      'action': action.toJson(),
+      'stock': stock.toJson(),
+      'scope': scope?.toJson(),
+      'ammunition': ammunition?.toJson(),
       'isActive': isActive,
       'notes': notes,
-      // New advanced fields
       'serialNumber': serialNumber,
       'overallLength': overallLength,
       'weight': weight,
@@ -204,8 +147,6 @@ class RifleModel extends HiveObject {
       'sightHeight': sightHeight,
       'purchaseDate': purchaseDate,
       'modifications': modifications,
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -225,7 +166,6 @@ class RifleModel extends HiveObject {
       ammunition: ammunition?.toEntity(),
       isActive: isActive,
       notes: notes,
-      // New advanced fields
       serialNumber: serialNumber,
       overallLength: overallLength,
       weight: weight,
@@ -241,22 +181,12 @@ class RifleModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 1)
-class BarrelModel extends HiveObject {
-  @HiveField(0)
-  String? length;
-
-  @HiveField(1)
-  String? twist;
-
-  @HiveField(2)
-  String? threading;
-
-  @HiveField(3)
-  String? material;
-
-  @HiveField(4)
-  String? profile;
+class BarrelModel {
+  final String? length;
+  final String? twist;
+  final String? threading;
+  final String? material;
+  final String? profile;
 
   BarrelModel({
     this.length,
@@ -276,18 +206,17 @@ class BarrelModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore methods
-  factory BarrelModel.fromFirestore(Map<String, dynamic> data) {
+  factory BarrelModel.fromJson(Map<String, dynamic> json) {
     return BarrelModel(
-      length: data['length'],
-      twist: data['twist'],
-      threading: data['threading'],
-      material: data['material'],
-      profile: data['profile'],
+      length: json['length'],
+      twist: json['twist'],
+      threading: json['threading'],
+      material: json['material'],
+      profile: json['profile'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'length': length,
       'twist': twist,
@@ -308,16 +237,10 @@ class BarrelModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 2)
-class ActionModel extends HiveObject {
-  @HiveField(0)
-  String? type;
-
-  @HiveField(1)
-  String? trigger;
-
-  @HiveField(2)
-  String? triggerWeight;
+class ActionModel {
+  final String? type;
+  final String? trigger;
+  final String? triggerWeight;
 
   ActionModel({
     this.type,
@@ -333,16 +256,15 @@ class ActionModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore methods
-  factory ActionModel.fromFirestore(Map<String, dynamic> data) {
+  factory ActionModel.fromJson(Map<String, dynamic> json) {
     return ActionModel(
-      type: data['type'],
-      trigger: data['trigger'],
-      triggerWeight: data['triggerWeight'],
+      type: json['type'],
+      trigger: json['trigger'],
+      triggerWeight: json['triggerWeight'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'type': type,
       'trigger': trigger,
@@ -359,19 +281,11 @@ class ActionModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 3)
-class StockModel extends HiveObject {
-  @HiveField(0)
-  String? manufacturer;
-
-  @HiveField(1)
-  String? model;
-
-  @HiveField(2)
-  bool adjustableLOP;
-
-  @HiveField(3)
-  bool adjustableCheekRest;
+class StockModel {
+  final String? manufacturer;
+  final String? model;
+  final bool adjustableLOP;
+  final bool adjustableCheekRest;
 
   StockModel({
     this.manufacturer,
@@ -389,17 +303,16 @@ class StockModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore methods
-  factory StockModel.fromFirestore(Map<String, dynamic> data) {
+  factory StockModel.fromJson(Map<String, dynamic> json) {
     return StockModel(
-      manufacturer: data['manufacturer'],
-      model: data['model'],
-      adjustableLOP: data['adjustableLOP'] ?? false,
-      adjustableCheekRest: data['adjustableCheekRest'] ?? false,
+      manufacturer: json['manufacturer'],
+      model: json['model'],
+      adjustableLOP: json['adjustableLOP'] ?? false,
+      adjustableCheekRest: json['adjustableCheekRest'] ?? false,
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'manufacturer': manufacturer,
       'model': model,

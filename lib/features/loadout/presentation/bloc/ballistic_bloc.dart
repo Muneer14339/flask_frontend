@@ -27,7 +27,7 @@ class BallisticBloc extends Bloc<BallisticEvent, BallisticState> {
   final DeleteBallisticCalculation deleteBallisticCalculation;
   final CalculateBallistics calculateBallistics;
 
-  // Firebase repository for real-time streams
+  // HTTP repository for real-time streams
   final BallisticRepositoryImpl ballisticRepository;
 
   // Stream subscriptions
@@ -114,7 +114,7 @@ class BallisticBloc extends Bloc<BallisticEvent, BallisticState> {
     }
   }
 
-  // Start listening to Firebase streams
+  // Start listening to HTTP streams (polling-based)
   void _startListeningToStreams(String rifleId) {
     // Listen to DOPE entries stream
     _dopeSubscription = ballisticRepository.getDopeEntriesStream(rifleId)?.listen(

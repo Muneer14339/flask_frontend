@@ -1,44 +1,18 @@
-// lib/features/Loadout/data/models/scope_model.dart
-import 'package:hive/hive.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/features/loadout/data/models/scope_model.dart
 import '../../domain/entities/scope.dart';
 
-// part 'scope_model.g.dart';
-
-@HiveType(typeId: 7)
-class ScopeModel extends HiveObject {
-  @HiveField(0)
-  String id;
-
-  @HiveField(1)
-  String manufacturer;
-
-  @HiveField(2)
-  String model;
-
-  @HiveField(3)
-  String? tubeSize;
-
-  @HiveField(4)
-  String? focalPlane;
-
-  @HiveField(5)
-  String? reticle;
-
-  @HiveField(6)
-  String? trackingUnits;
-
-  @HiveField(7)
-  String? clickValue;
-
-  @HiveField(8)
-  TotalTravelModel totalTravel;
-
-  @HiveField(9)
-  List<ZeroDataModel> zeroData;
-
-  @HiveField(10)
-  String? notes;
+class ScopeModel {
+  final String id;
+  final String manufacturer;
+  final String model;
+  final String? tubeSize;
+  final String? focalPlane;
+  final String? reticle;
+  final String? trackingUnits;
+  final String? clickValue;
+  final TotalTravelModel totalTravel;
+  final List<ZeroDataModel> zeroData;
+  final String? notes;
 
   ScopeModel({
     required this.id,
@@ -70,27 +44,27 @@ class ScopeModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore serialization methods
-  factory ScopeModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory ScopeModel.fromJson(Map<String, dynamic> json) {
     return ScopeModel(
-      id: id,
-      manufacturer: data['manufacturer'] ?? '',
-      model: data['model'] ?? '',
-      tubeSize: data['tubeSize'],
-      focalPlane: data['focalPlane'],
-      reticle: data['reticle'],
-      trackingUnits: data['trackingUnits'],
-      clickValue: data['clickValue'],
-      totalTravel: TotalTravelModel.fromFirestore(data['totalTravel'] ?? {}),
-      zeroData: (data['zeroData'] as List?)
-          ?.map((item) => ZeroDataModel.fromFirestore(item))
+      id: json['id'] ?? '',
+      manufacturer: json['manufacturer'] ?? '',
+      model: json['model'] ?? '',
+      tubeSize: json['tubeSize'],
+      focalPlane: json['focalPlane'],
+      reticle: json['reticle'],
+      trackingUnits: json['trackingUnits'],
+      clickValue: json['clickValue'],
+      totalTravel: TotalTravelModel.fromJson(json['totalTravel'] ?? {}),
+      zeroData: (json['zeroData'] as List?)
+          ?.map((item) => ZeroDataModel.fromJson(item))
           .toList() ?? [],
-      notes: data['notes'],
+      notes: json['notes'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'manufacturer': manufacturer,
       'model': model,
       'tubeSize': tubeSize,
@@ -98,11 +72,9 @@ class ScopeModel extends HiveObject {
       'reticle': reticle,
       'trackingUnits': trackingUnits,
       'clickValue': clickValue,
-      'totalTravel': totalTravel.toFirestore(),
-      'zeroData': zeroData.map((zero) => zero.toFirestore()).toList(),
+      'totalTravel': totalTravel.toJson(),
+      'zeroData': zeroData.map((zero) => zero.toJson()).toList(),
       'notes': notes,
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -123,13 +95,9 @@ class ScopeModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 8)
-class TotalTravelModel extends HiveObject {
-  @HiveField(0)
-  String? elevation;
-
-  @HiveField(1)
-  String? windage;
+class TotalTravelModel {
+  final String? elevation;
+  final String? windage;
 
   TotalTravelModel({
     this.elevation,
@@ -143,15 +111,14 @@ class TotalTravelModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore methods
-  factory TotalTravelModel.fromFirestore(Map<String, dynamic> data) {
+  factory TotalTravelModel.fromJson(Map<String, dynamic> json) {
     return TotalTravelModel(
-      elevation: data['elevation'],
-      windage: data['windage'],
+      elevation: json['elevation'],
+      windage: json['windage'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'elevation': elevation,
       'windage': windage,
@@ -166,19 +133,11 @@ class TotalTravelModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 9)
-class ZeroDataModel extends HiveObject {
-  @HiveField(0)
-  int distance;
-
-  @HiveField(1)
-  String units;
-
-  @HiveField(2)
-  String elevation;
-
-  @HiveField(3)
-  String windage;
+class ZeroDataModel {
+  final int distance;
+  final String units;
+  final String elevation;
+  final String windage;
 
   ZeroDataModel({
     required this.distance,
@@ -196,17 +155,16 @@ class ZeroDataModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore methods
-  factory ZeroDataModel.fromFirestore(Map<String, dynamic> data) {
+  factory ZeroDataModel.fromJson(Map<String, dynamic> json) {
     return ZeroDataModel(
-      distance: data['distance'] ?? 0,
-      units: data['units'] ?? 'yards',
-      elevation: data['elevation'] ?? '0',
-      windage: data['windage'] ?? '0',
+      distance: json['distance'] ?? 0,
+      units: json['units'] ?? 'yards',
+      elevation: json['elevation'] ?? '0',
+      windage: json['windage'] ?? '0',
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'distance': distance,
       'units': units,

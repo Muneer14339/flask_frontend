@@ -1,11 +1,10 @@
-// lib/features/Loadout/presentation/bloc/Loadout_bloc.dart - Final Updated
+// lib/features/loadout/presentation/bloc/loadout_bloc.dart
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:rt_tiltcant_accgyro/features/loadout/domain/usecases/delete_maintenance.dart';
-import 'package:rt_tiltcant_accgyro/features/loadout/domain/usecases/delete_scope.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../../../core/error/failures.dart';
+import '../../data/repositories/loadout_http_repository_impl.dart';
 import '../../data/repositories/loadout_repository_impl.dart';
 import '../../domain/entities/rifle.dart';
 import '../../domain/entities/ammunition.dart';
@@ -21,10 +20,11 @@ import '../../domain/usecases/get_maintenance.dart';
 import '../../domain/usecases/add_maintenance.dart';
 import '../../domain/usecases/delete_ammunition.dart';
 import '../../domain/usecases/complete_maintenance.dart';
+import '../../domain/usecases/delete_maintenance.dart';
+import '../../domain/usecases/delete_scope.dart';
 import '../../domain/usecases/update_rifle_scope.dart';
 import '../../domain/usecases/update_rifle_ammunition.dart';
 import '../../domain/usecases/update_rifle.dart';
-// Import the new update use cases
 import '../../domain/usecases/update_scope.dart';
 import '../../domain/usecases/update_ammunition.dart';
 
@@ -50,8 +50,8 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
   final UpdateScope updateScope;
   final UpdateAmmunition updateAmmunition;
 
-  // Firebase repository for real-time streams
-  final LoadoutFirebaseRepositoryImpl firebaseRepository;
+  // HTTP repository for real-time streams
+  final LoadoutRepositoryImpl httpRepository;
 
   // Stream subscriptions
   StreamSubscription<dynamic>? _riflesSubscription;
@@ -77,7 +77,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     required this.updateRifle,
     required this.updateScope,
     required this.updateAmmunition,
-    required this.firebaseRepository,
+    required this.httpRepository,
   }) : super(LoadoutInitial()) {
     on<LoadLoadoutEvent>(_onLoadLoadout);
     on<AddRifleEvent>(_onAddRifle);
@@ -92,7 +92,6 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     on<UpdateRifleScopeEvent>(_onUpdateRifleScope);
     on<UpdateRifleAmmunitionEvent>(_onUpdateRifleAmmunition);
     on<UpdateRifleEvent>(_onUpdateRifle);
-    // Add new update event handlers
     on<UpdateScopeEvent>(_onUpdateScope);
     on<UpdateAmmunitionEvent>(_onUpdateAmmunition);
 
@@ -103,8 +102,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     on<_MaintenanceUpdatedEvent>(_onMaintenanceUpdated);
   }
 
-  Future<void> _onLoadLoadout(
-      LoadLoadoutEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onLoadLoadout(LoadLoadoutEvent event, Emitter<LoadoutState> emit) async {
     emit(LoadoutLoading());
 
     try {
@@ -118,17 +116,17 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
       final maintenanceResult = await getMaintenance(NoParams());
 
       riflesResult.fold(
-        (failure) => emit(LoadoutError(failure.toString())),
-        (rifles) {
-          ammunitionResult.fold(
             (failure) => emit(LoadoutError(failure.toString())),
-            (ammunition) {
-              scopesResult.fold(
+            (rifles) {
+          ammunitionResult.fold(
                 (failure) => emit(LoadoutError(failure.toString())),
-                (scopes) {
-                  maintenanceResult.fold(
+                (ammunition) {
+              scopesResult.fold(
                     (failure) => emit(LoadoutError(failure.toString())),
-                    (maintenance) {
+                    (scopes) {
+                  maintenanceResult.fold(
+                        (failure) => emit(LoadoutError(failure.toString())),
+                        (maintenance) {
                       emit(LoadoutLoaded(
                         rifles: rifles,
                         ammunition: ammunition,
@@ -148,69 +146,63 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     }
   }
 
-  // Start listening to Firebase streams
+  // Start listening to HTTP streams (polling-based)
   void _startListeningToStreams() {
     // Listen to rifles stream
-    _riflesSubscription = firebaseRepository.getRiflesStream().listen(
-      (either) {
+    _riflesSubscription = httpRepository.getRiflesStream().listen(
+          (either) {
         either.fold(
-          (failure) => add(_RiflesUpdatedEvent(failure: failure)),
-          (rifles) => add(_RiflesUpdatedEvent(rifles: rifles)),
+              (failure) => add(_RiflesUpdatedEvent(failure: failure)),
+              (rifles) => add(_RiflesUpdatedEvent(rifles: rifles)),
         );
       },
       onError: (error) {
-        add(_RiflesUpdatedEvent(
-            failure: DatabaseFailure('Stream error: $error')));
+        add(_RiflesUpdatedEvent(failure: DatabaseFailure('Stream error: $error')));
       },
     );
 
     // Listen to ammunition stream
-    _ammunitionSubscription = firebaseRepository.getAmmunitionStream().listen(
-      (either) {
+    _ammunitionSubscription = httpRepository.getAmmunitionStream().listen(
+          (either) {
         either.fold(
-          (failure) => add(_AmmunitionUpdatedEvent(failure: failure)),
-          (ammunition) => add(_AmmunitionUpdatedEvent(ammunition: ammunition)),
+              (failure) => add(_AmmunitionUpdatedEvent(failure: failure)),
+              (ammunition) => add(_AmmunitionUpdatedEvent(ammunition: ammunition)),
         );
       },
       onError: (error) {
-        add(_AmmunitionUpdatedEvent(
-            failure: DatabaseFailure('Stream error: $error')));
+        add(_AmmunitionUpdatedEvent(failure: DatabaseFailure('Stream error: $error')));
       },
     );
 
     // Listen to scopes stream
-    _scopesSubscription = firebaseRepository.getScopesStream().listen(
-      (either) {
+    _scopesSubscription = httpRepository.getScopesStream().listen(
+          (either) {
         either.fold(
-          (failure) => add(_ScopesUpdatedEvent(failure: failure)),
-          (scopes) => add(_ScopesUpdatedEvent(scopes: scopes)),
+              (failure) => add(_ScopesUpdatedEvent(failure: failure)),
+              (scopes) => add(_ScopesUpdatedEvent(scopes: scopes)),
         );
       },
       onError: (error) {
-        add(_ScopesUpdatedEvent(
-            failure: DatabaseFailure('Stream error: $error')));
+        add(_ScopesUpdatedEvent(failure: DatabaseFailure('Stream error: $error')));
       },
     );
 
     // Listen to maintenance stream
-    _maintenanceSubscription = firebaseRepository.getMaintenanceStream().listen(
-      (either) {
+    _maintenanceSubscription = httpRepository.getMaintenanceStream().listen(
+          (either) {
         either.fold(
-          (failure) => add(_MaintenanceUpdatedEvent(failure: failure)),
-          (maintenance) =>
-              add(_MaintenanceUpdatedEvent(maintenance: maintenance)),
+              (failure) => add(_MaintenanceUpdatedEvent(failure: failure)),
+              (maintenance) => add(_MaintenanceUpdatedEvent(maintenance: maintenance)),
         );
       },
       onError: (error) {
-        add(_MaintenanceUpdatedEvent(
-            failure: DatabaseFailure('Stream error: $error')));
+        add(_MaintenanceUpdatedEvent(failure: DatabaseFailure('Stream error: $error')));
       },
     );
   }
 
   // Handle real-time updates
-  Future<void> _onRiflesUpdated(
-      _RiflesUpdatedEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onRiflesUpdated(_RiflesUpdatedEvent event, Emitter<LoadoutState> emit) async {
     if (event.failure != null) {
       emit(LoadoutError(event.failure.toString()));
       return;
@@ -222,8 +214,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     }
   }
 
-  Future<void> _onAmmunitionUpdated(
-      _AmmunitionUpdatedEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onAmmunitionUpdated(_AmmunitionUpdatedEvent event, Emitter<LoadoutState> emit) async {
     if (event.failure != null) {
       emit(LoadoutError(event.failure.toString()));
       return;
@@ -235,8 +226,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     }
   }
 
-  Future<void> _onScopesUpdated(
-      _ScopesUpdatedEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onScopesUpdated(_ScopesUpdatedEvent event, Emitter<LoadoutState> emit) async {
     if (event.failure != null) {
       emit(LoadoutError(event.failure.toString()));
       return;
@@ -248,8 +238,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     }
   }
 
-  Future<void> _onMaintenanceUpdated(
-      _MaintenanceUpdatedEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onMaintenanceUpdated(_MaintenanceUpdatedEvent event, Emitter<LoadoutState> emit) async {
     if (event.failure != null) {
       emit(LoadoutError(event.failure.toString()));
       return;
@@ -261,53 +250,47 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     }
   }
 
-  Future<void> _onAddRifle(
-      AddRifleEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onAddRifle(AddRifleEvent event, Emitter<LoadoutState> emit) async {
     final result = await addRifle(event.rifle);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
         print('✅ Rifle added successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onAddAmmunition(
-      AddAmmunitionEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onAddAmmunition(AddAmmunitionEvent event, Emitter<LoadoutState> emit) async {
     final result = await addAmmunition(event.ammunition);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
         print('✅ Ammunition added successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onAddScope(
-      AddScopeEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onAddScope(AddScopeEvent event, Emitter<LoadoutState> emit) async {
     final result = await addScope(event.scope);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
         print('✅ Scope added successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onAddMaintenance(
-      AddMaintenanceEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onAddMaintenance(AddMaintenanceEvent event, Emitter<LoadoutState> emit) async {
     final result = await addMaintenance(event.maintenance);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
-        print(
-            '✅ Maintenance task added successfully - real-time update will follow');
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
+        print('✅ Maintenance task added successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onSetActiveRifle(
-      SetActiveRifleEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onSetActiveRifle(SetActiveRifleEvent event, Emitter<LoadoutState> emit) async {
     if (state is LoadoutLoaded) {
       final currentState = state as LoadoutLoaded;
 
@@ -318,9 +301,9 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
 
       emit(currentState.copyWith(rifles: updatedRifles));
 
-      // Update in Firebase (real-time stream will handle the actual update)
+      // Update in backend (real-time stream will handle the actual update)
       try {
-        await firebaseRepository.setActiveRifle(event.rifleId);
+        await httpRepository.setActiveRifle(event.rifleId);
       } catch (e) {
         // Revert optimistic update on error
         emit(currentState);
@@ -329,55 +312,47 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     }
   }
 
-  Future<void> _onDeleteAmmunition(
-      DeleteAmmunitionEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onDeleteAmmunition(DeleteAmmunitionEvent event, Emitter<LoadoutState> emit) async {
     final result = await deleteAmmunition(event.ammunitionId);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
-        print(
-            '✅ Ammunition deleted successfully - real-time update will follow');
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
+        print('✅ Ammunition deleted successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onCompleteMaintenance(
-      CompleteMaintenanceEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onCompleteMaintenance(CompleteMaintenanceEvent event, Emitter<LoadoutState> emit) async {
     final result = await completeMaintenance(event.maintenanceId);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
-        print(
-            '✅ Maintenance completed successfully - real-time update will follow');
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
+        print('✅ Maintenance completed successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onDeleteScope(
-      DeleteScopeEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onDeleteScope(DeleteScopeEvent event, Emitter<LoadoutState> emit) async {
     final result = await deleteScope(event.scopeId);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
         print('✅ Scope deleted successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onDeleteMaintenance(
-      DeleteMaintenanceEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onDeleteMaintenance(DeleteMaintenanceEvent event, Emitter<LoadoutState> emit) async {
     final result = await deleteMaintenance(event.maintenanceId);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
-        print(
-            '✅ Maintenence deleted successfully - real-time update will follow');
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
+        print('✅ Maintenance deleted successfully - real-time update will follow');
       },
     );
   }
 
-  Future<void> _onUpdateRifleScope(
-      UpdateRifleScopeEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onUpdateRifleScope(UpdateRifleScopeEvent event, Emitter<LoadoutState> emit) async {
     if (state is LoadoutLoaded) {
       final result = await updateRifleScope(UpdateRifleScopeParams(
         rifleId: event.rifleId,
@@ -385,16 +360,15 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
       ));
 
       result.fold(
-        (failure) => emit(LoadoutError(failure.toString())),
-        (_) {
+            (failure) => emit(LoadoutError(failure.toString())),
+            (_) {
           print('✅ Scope update successful - real-time update will follow');
         },
       );
     }
   }
 
-  Future<void> _onUpdateRifleAmmunition(
-      UpdateRifleAmmunitionEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onUpdateRifleAmmunition(UpdateRifleAmmunitionEvent event, Emitter<LoadoutState> emit) async {
     if (state is LoadoutLoaded) {
       final result = await updateRifleAmmunition(UpdateRifleAmmunitionParams(
         rifleId: event.rifleId,
@@ -402,45 +376,39 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
       ));
 
       result.fold(
-        (failure) => emit(LoadoutError(failure.toString())),
-        (_) {
-          print(
-              '✅ Ammunition update successful - real-time update will follow');
+            (failure) => emit(LoadoutError(failure.toString())),
+            (_) {
+          print('✅ Ammunition update successful - real-time update will follow');
         },
       );
     }
   }
 
-  Future<void> _onUpdateRifle(
-      UpdateRifleEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onUpdateRifle(UpdateRifleEvent event, Emitter<LoadoutState> emit) async {
     final result = await updateRifle(event.rifle);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
         print('✅ Rifle update successful - real-time update will follow');
       },
     );
   }
 
-  // NEW: Update scope handler
-  Future<void> _onUpdateScope(
-      UpdateScopeEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onUpdateScope(UpdateScopeEvent event, Emitter<LoadoutState> emit) async {
     final result = await updateScope(event.scope);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
         print('✅ Scope update successful - real-time update will follow');
       },
     );
   }
 
-  // NEW: Update ammunition handler
-  Future<void> _onUpdateAmmunition(
-      UpdateAmmunitionEvent event, Emitter<LoadoutState> emit) async {
+  Future<void> _onUpdateAmmunition(UpdateAmmunitionEvent event, Emitter<LoadoutState> emit) async {
     final result = await updateAmmunition(event.ammunition);
     result.fold(
-      (failure) => emit(LoadoutError(failure.toString())),
-      (_) {
+          (failure) => emit(LoadoutError(failure.toString())),
+          (_) {
         print('✅ Ammunition update successful - real-time update will follow');
       },
     );

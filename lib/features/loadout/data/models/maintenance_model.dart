@@ -1,41 +1,17 @@
-// lib/features/Loadout/data/models/maintenance_model.dart
-import 'package:hive/hive.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/features/loadout/data/models/maintenance_model.dart
 import '../../domain/entities/maintenance.dart';
 
-// part 'maintenance_model.g.dart';
-
-@HiveType(typeId: 10)
-class MaintenanceModel extends HiveObject {
-  @HiveField(0)
-  String id;
-
-  @HiveField(1)
-  String title;
-
-  @HiveField(2)
-  String rifleId;
-
-  @HiveField(3)
-  String type;
-
-  @HiveField(4)
-  MaintenanceIntervalModel interval;
-
-  @HiveField(5)
-  DateTime? lastCompleted;
-
-  @HiveField(6)
-  int? currentCount;
-
-  @HiveField(7)
-  String? torqueSpec;
-
-  @HiveField(8)
-  String? notes;
-
-  @HiveField(9) // NEW: Add HiveField for createdAt
-  DateTime? createdAt;
+class MaintenanceModel {
+  final String id;
+  final String title;
+  final String rifleId;
+  final String type;
+  final MaintenanceIntervalModel interval;
+  final DateTime? lastCompleted;
+  final int? currentCount;
+  final String? torqueSpec;
+  final String? notes;
+  final DateTime? createdAt;
 
   MaintenanceModel({
     required this.id,
@@ -47,7 +23,7 @@ class MaintenanceModel extends HiveObject {
     this.currentCount,
     this.torqueSpec,
     this.notes,
-    this.createdAt, // NEW
+    this.createdAt,
   });
 
   factory MaintenanceModel.fromEntity(Maintenance maintenance) {
@@ -61,42 +37,41 @@ class MaintenanceModel extends HiveObject {
       currentCount: maintenance.currentCount,
       torqueSpec: maintenance.torqueSpec,
       notes: maintenance.notes,
-      createdAt: maintenance.createdAt, // NEW
+      createdAt: maintenance.createdAt,
     );
   }
 
-
-  factory MaintenanceModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory MaintenanceModel.fromJson(Map<String, dynamic> json) {
     return MaintenanceModel(
-      id: id,
-      title: data['title'] ?? '',
-      rifleId: data['rifleId'] ?? '',
-      type: data['type'] ?? '',
-      interval: MaintenanceIntervalModel.fromFirestore(data['interval'] ?? {}),
-      lastCompleted: data['lastCompleted'] != null
-          ? (data['lastCompleted'] as Timestamp).toDate()
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      rifleId: json['rifleId'] ?? '',
+      type: json['type'] ?? '',
+      interval: MaintenanceIntervalModel.fromJson(json['interval'] ?? {}),
+      lastCompleted: json['lastCompleted'] != null
+          ? DateTime.parse(json['lastCompleted'])
           : null,
-      currentCount: data['currentCount'],
-      torqueSpec: data['torqueSpec'],
-      notes: data['notes'],
-      createdAt: data['createdAt'] != null // NEW: Handle createdAt
-          ? (data['createdAt'] as Timestamp).toDate()
+      currentCount: json['currentCount'],
+      torqueSpec: json['torqueSpec'],
+      notes: json['notes'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : null,
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'rifleId': rifleId,
       'type': type,
-      'interval': interval.toFirestore(),
-      'lastCompleted': lastCompleted != null ? Timestamp.fromDate(lastCompleted!) : null,
+      'interval': interval.toJson(),
+      'lastCompleted': lastCompleted?.toIso8601String(),
       'currentCount': currentCount,
       'torqueSpec': torqueSpec,
       'notes': notes,
-      'createdAt': FieldValue.serverTimestamp(), // Already included
-      'updatedAt': FieldValue.serverTimestamp(),
+      'createdAt': createdAt?.toIso8601String(),
     };
   }
 
@@ -111,18 +86,14 @@ class MaintenanceModel extends HiveObject {
       currentCount: currentCount,
       torqueSpec: torqueSpec,
       notes: notes,
-      createdAt: createdAt, // NEW
+      createdAt: createdAt,
     );
   }
 }
 
-@HiveType(typeId: 11)
-class MaintenanceIntervalModel extends HiveObject {
-  @HiveField(0)
-  int value;
-
-  @HiveField(1)
-  String unit;
+class MaintenanceIntervalModel {
+  final int value;
+  final String unit;
 
   MaintenanceIntervalModel({
     required this.value,
@@ -136,15 +107,14 @@ class MaintenanceIntervalModel extends HiveObject {
     );
   }
 
-  // NEW: Firestore methods
-  factory MaintenanceIntervalModel.fromFirestore(Map<String, dynamic> data) {
+  factory MaintenanceIntervalModel.fromJson(Map<String, dynamic> json) {
     return MaintenanceIntervalModel(
-      value: data['value'] ?? 0,
-      unit: data['unit'] ?? 'days',
+      value: json['value'] ?? 0,
+      unit: json['unit'] ?? 'days',
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'value': value,
       'unit': unit,

@@ -10,6 +10,7 @@ abstract class HttpAuthDataSource {
   Future<bool> verifyOtp(String email, String otp);
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
+  String? getToken();
 }
 
 class HttpAuthDataSourceImpl implements HttpAuthDataSource {
@@ -304,5 +305,6 @@ class HttpAuthDataSourceImpl implements HttpAuthDataSource {
     }
   }
 
+  @override
   String? getToken() => _accessToken;
 }

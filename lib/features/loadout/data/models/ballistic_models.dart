@@ -1,5 +1,4 @@
 // lib/features/loadout/data/models/ballistic_models.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/ballistic_data.dart';
 
 class DopeEntryModel {
@@ -36,29 +35,31 @@ class DopeEntryModel {
     );
   }
 
-  factory DopeEntryModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory DopeEntryModel.fromJson(Map<String, dynamic> json) {
     return DopeEntryModel(
-      id: id,
-      rifleId: data['rifleId'] ?? '',
-      ammunitionId: data['ammunitionId'] ?? '',
-      distance: data['distance'] ?? 0,
-      elevation: data['elevation'] ?? '0',
-      windage: data['windage'] ?? '0',
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      notes: data['notes'],
+      id: json['id'] ?? '',
+      rifleId: json['rifleId'] ?? '',
+      ammunitionId: json['ammunitionId'] ?? '',
+      distance: json['distance'] ?? 0,
+      elevation: json['elevation'] ?? '0',
+      windage: json['windage'] ?? '0',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      notes: json['notes'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'rifleId': rifleId,
       'ammunitionId': ammunitionId,
       'distance': distance,
       'elevation': elevation,
       'windage': windage,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'createdAt': createdAt.toIso8601String(),
       'notes': notes,
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -74,8 +75,6 @@ class DopeEntryModel {
       notes: notes,
     );
   }
-
-
 }
 
 class ZeroEntryModel {
@@ -109,27 +108,29 @@ class ZeroEntryModel {
     );
   }
 
-  factory ZeroEntryModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory ZeroEntryModel.fromJson(Map<String, dynamic> json) {
     return ZeroEntryModel(
-      id: id,
-      rifleId: data['rifleId'] ?? '',
-      distance: data['distance'] ?? 0,
-      poiOffset: data['poiOffset'] ?? '0',
-      confirmed: data['confirmed'] ?? false,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      notes: data['notes'],
+      id: json['id'] ?? '',
+      rifleId: json['rifleId'] ?? '',
+      distance: json['distance'] ?? 0,
+      poiOffset: json['poiOffset'] ?? '0',
+      confirmed: json['confirmed'] ?? false,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      notes: json['notes'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'rifleId': rifleId,
       'distance': distance,
       'poiOffset': poiOffset,
       'confirmed': confirmed,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'createdAt': createdAt.toIso8601String(),
       'notes': notes,
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -183,31 +184,33 @@ class ChronographDataModel {
     );
   }
 
-  factory ChronographDataModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory ChronographDataModel.fromJson(Map<String, dynamic> json) {
     return ChronographDataModel(
-      id: id,
-      rifleId: data['rifleId'] ?? '',
-      ammunitionId: data['ammunitionId'] ?? '',
-      velocities: List<double>.from(data['velocities'] ?? []),
-      average: (data['average'] ?? 0.0).toDouble(),
-      extremeSpread: (data['extremeSpread'] ?? 0.0).toDouble(),
-      standardDeviation: (data['standardDeviation'] ?? 0.0).toDouble(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      notes: data['notes'],
+      id: json['id'] ?? '',
+      rifleId: json['rifleId'] ?? '',
+      ammunitionId: json['ammunitionId'] ?? '',
+      velocities: List<double>.from(json['velocities'] ?? []),
+      average: (json['average'] ?? 0.0).toDouble(),
+      extremeSpread: (json['extremeSpread'] ?? 0.0).toDouble(),
+      standardDeviation: (json['standardDeviation'] ?? 0.0).toDouble(),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      notes: json['notes'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'rifleId': rifleId,
       'ammunitionId': ammunitionId,
       'velocities': velocities,
       'average': average,
       'extremeSpread': extremeSpread,
       'standardDeviation': standardDeviation,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'createdAt': createdAt.toIso8601String(),
       'notes': notes,
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -269,26 +272,29 @@ class BallisticCalculationModel {
     );
   }
 
-  factory BallisticCalculationModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory BallisticCalculationModel.fromJson(Map<String, dynamic> json) {
     return BallisticCalculationModel(
-      id: id,
-      rifleId: data['rifleId'] ?? '',
-      ammunitionId: data['ammunitionId'] ?? '',
-      ballisticCoefficient: (data['ballisticCoefficient'] ?? 0.0).toDouble(),
-      muzzleVelocity: (data['muzzleVelocity'] ?? 0.0).toDouble(),
-      targetDistance: data['targetDistance'] ?? 0,
-      windSpeed: (data['windSpeed'] ?? 0.0).toDouble(),
-      windDirection: (data['windDirection'] ?? 0.0).toDouble(),
-      trajectoryData: (data['trajectoryData'] as List?)
-          ?.map((e) => BallisticPointModel.fromMap(e))
+      id: json['id'] ?? '',
+      rifleId: json['rifleId'] ?? '',
+      ammunitionId: json['ammunitionId'] ?? '',
+      ballisticCoefficient: (json['ballisticCoefficient'] ?? 0.0).toDouble(),
+      muzzleVelocity: (json['muzzleVelocity'] ?? 0.0).toDouble(),
+      targetDistance: json['targetDistance'] ?? 0,
+      windSpeed: (json['windSpeed'] ?? 0.0).toDouble(),
+      windDirection: (json['windDirection'] ?? 0.0).toDouble(),
+      trajectoryData: (json['trajectoryData'] as List?)
+          ?.map((e) => BallisticPointModel.fromJson(e))
           .toList() ?? [],
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      notes: data['notes'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      notes: json['notes'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'rifleId': rifleId,
       'ammunitionId': ammunitionId,
       'ballisticCoefficient': ballisticCoefficient,
@@ -296,10 +302,9 @@ class BallisticCalculationModel {
       'targetDistance': targetDistance,
       'windSpeed': windSpeed,
       'windDirection': windDirection,
-      'trajectoryData': trajectoryData.map((e) => e.toMap()).toList(),
-      'createdAt': Timestamp.fromDate(createdAt),
+      'trajectoryData': trajectoryData.map((e) => e.toJson()).toList(),
+      'createdAt': createdAt.toIso8601String(),
       'notes': notes,
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -348,18 +353,18 @@ class BallisticPointModel {
     );
   }
 
-  factory BallisticPointModel.fromMap(Map<String, dynamic> data) {
+  factory BallisticPointModel.fromJson(Map<String, dynamic> json) {
     return BallisticPointModel(
-      range: data['range'] ?? 0,
-      drop: (data['drop'] ?? 0.0).toDouble(),
-      windDrift: (data['windDrift'] ?? 0.0).toDouble(),
-      velocity: (data['velocity'] ?? 0.0).toDouble(),
-      energy: (data['energy'] ?? 0.0).toDouble(),
-      timeOfFlight: (data['timeOfFlight'] ?? 0.0).toDouble(),
+      range: json['range'] ?? 0,
+      drop: (json['drop'] ?? 0.0).toDouble(),
+      windDrift: (json['windDrift'] ?? 0.0).toDouble(),
+      velocity: (json['velocity'] ?? 0.0).toDouble(),
+      energy: (json['energy'] ?? 0.0).toDouble(),
+      timeOfFlight: (json['timeOfFlight'] ?? 0.0).toDouble(),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'range': range,
       'drop': drop,

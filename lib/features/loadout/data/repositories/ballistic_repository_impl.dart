@@ -1,23 +1,21 @@
-
 // lib/features/loadout/data/repositories/ballistic_repository_impl.dart
-import 'dart:math';
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/ballistic_data.dart';
 import '../../domain/repositories/ballistic_repository.dart';
-import '../datasources/ballistic_firebase_data_source.dart';
+import '../datasources/ballistic_http_data_source.dart';
 import '../models/ballistic_models.dart';
 
 class BallisticRepositoryImpl implements BallisticRepository {
-  final BallisticFirebaseDataSource firebaseDataSource;
+  final BallisticHttpDataSource httpDataSource;
 
-  BallisticRepositoryImpl({required this.firebaseDataSource});
+  BallisticRepositoryImpl({required this.httpDataSource});
 
   @override
   Future<Either<Failure, void>> saveDopeEntry(DopeEntry entry) async {
     try {
       final model = DopeEntryModel.fromEntity(entry);
-      await firebaseDataSource.saveDopeEntry(model);
+      await httpDataSource.saveDopeEntry(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to save DOPE entry: $e'));
@@ -27,7 +25,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, List<DopeEntry>>> getDopeEntries(String rifleId) async {
     try {
-      final models = await firebaseDataSource.getDopeEntries(rifleId);
+      final models = await httpDataSource.getDopeEntries(rifleId);
       final entries = models.map((model) => model.toEntity()).toList();
       return Right(entries);
     } catch (e) {
@@ -38,7 +36,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, void>> deleteDopeEntry(String entryId) async {
     try {
-      await firebaseDataSource.deleteDopeEntry(entryId);
+      await httpDataSource.deleteDopeEntry(entryId);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to delete DOPE entry: $e'));
@@ -47,7 +45,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
 
   @override
   Stream<Either<Failure, List<DopeEntry>>>? getDopeEntriesStream(String rifleId) {
-    return firebaseDataSource.getDopeEntriesStream(rifleId).map((models) {
+    return httpDataSource.getDopeEntriesStream(rifleId).map((models) {
       try {
         final entries = models.map((model) => model.toEntity()).toList();
         return Right<Failure, List<DopeEntry>>(entries);
@@ -61,7 +59,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   Future<Either<Failure, void>> saveZeroEntry(ZeroEntry entry) async {
     try {
       final model = ZeroEntryModel.fromEntity(entry);
-      await firebaseDataSource.saveZeroEntry(model);
+      await httpDataSource.saveZeroEntry(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to save zero entry: $e'));
@@ -71,7 +69,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, List<ZeroEntry>>> getZeroEntries(String rifleId) async {
     try {
-      final models = await firebaseDataSource.getZeroEntries(rifleId);
+      final models = await httpDataSource.getZeroEntries(rifleId);
       final entries = models.map((model) => model.toEntity()).toList();
       return Right(entries);
     } catch (e) {
@@ -82,7 +80,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, void>> deleteZeroEntry(String entryId) async {
     try {
-      await firebaseDataSource.deleteZeroEntry(entryId);
+      await httpDataSource.deleteZeroEntry(entryId);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to delete zero entry: $e'));
@@ -91,7 +89,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
 
   @override
   Stream<Either<Failure, List<ZeroEntry>>>? getZeroEntriesStream(String rifleId) {
-    return firebaseDataSource.getZeroEntriesStream(rifleId).map((models) {
+    return httpDataSource.getZeroEntriesStream(rifleId).map((models) {
       try {
         final entries = models.map((model) => model.toEntity()).toList();
         return Right<Failure, List<ZeroEntry>>(entries);
@@ -105,7 +103,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   Future<Either<Failure, void>> saveChronographData(ChronographData data) async {
     try {
       final model = ChronographDataModel.fromEntity(data);
-      await firebaseDataSource.saveChronographData(model);
+      await httpDataSource.saveChronographData(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to save chronograph data: $e'));
@@ -115,7 +113,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, List<ChronographData>>> getChronographData(String rifleId) async {
     try {
-      final models = await firebaseDataSource.getChronographData(rifleId);
+      final models = await httpDataSource.getChronographData(rifleId);
       final data = models.map((model) => model.toEntity()).toList();
       return Right(data);
     } catch (e) {
@@ -126,7 +124,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, void>> deleteChronographData(String dataId) async {
     try {
-      await firebaseDataSource.deleteChronographData(dataId);
+      await httpDataSource.deleteChronographData(dataId);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to delete chronograph data: $e'));
@@ -135,7 +133,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
 
   @override
   Stream<Either<Failure, List<ChronographData>>>? getChronographDataStream(String rifleId) {
-    return firebaseDataSource.getChronographDataStream(rifleId).map((models) {
+    return httpDataSource.getChronographDataStream(rifleId).map((models) {
       try {
         final data = models.map((model) => model.toEntity()).toList();
         return Right<Failure, List<ChronographData>>(data);
@@ -149,7 +147,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   Future<Either<Failure, void>> saveBallisticCalculation(BallisticCalculation calculation) async {
     try {
       final model = BallisticCalculationModel.fromEntity(calculation);
-      await firebaseDataSource.saveBallisticCalculation(model);
+      await httpDataSource.saveBallisticCalculation(model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to save ballistic calculation: $e'));
@@ -159,7 +157,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, List<BallisticCalculation>>> getBallisticCalculations(String rifleId) async {
     try {
-      final models = await firebaseDataSource.getBallisticCalculations(rifleId);
+      final models = await httpDataSource.getBallisticCalculations(rifleId);
       final calculations = models.map((model) => model.toEntity()).toList();
       return Right(calculations);
     } catch (e) {
@@ -170,7 +168,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
   @override
   Future<Either<Failure, void>> deleteBallisticCalculation(String calculationId) async {
     try {
-      await firebaseDataSource.deleteBallisticCalculation(calculationId);
+      await httpDataSource.deleteBallisticCalculation(calculationId);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to delete ballistic calculation: $e'));
@@ -179,7 +177,7 @@ class BallisticRepositoryImpl implements BallisticRepository {
 
   @override
   Stream<Either<Failure, List<BallisticCalculation>>>? getBallisticCalculationsStream(String rifleId) {
-    return firebaseDataSource.getBallisticCalculationsStream(rifleId).map((models) {
+    return httpDataSource.getBallisticCalculationsStream(rifleId).map((models) {
       try {
         final calculations = models.map((model) => model.toEntity()).toList();
         return Right<Failure, List<BallisticCalculation>>(calculations);
@@ -198,44 +196,18 @@ class BallisticRepositoryImpl implements BallisticRepository {
       double windDirection,
       ) async {
     try {
-      final List<BallisticPoint> trajectoryData = [];
+      final models = await httpDataSource.calculateBallistics(
+        ballisticCoefficient,
+        muzzleVelocity,
+        targetDistance,
+        windSpeed,
+        windDirection,
+      );
 
-      // Simplified ballistic calculation - for production use, consider using a proper ballistic library
-      const double gravity = 32.174; // ft/s²
-      const double airDensity = 0.0751; // lb/ft³ at sea level
-
-      for (int range = 100; range <= targetDistance; range += 100) {
-        // Calculate time of flight (simplified)
-        final double timeOfFlight = (range * 3) / muzzleVelocity;
-
-        // Calculate velocity at range (simplified drag model)
-        final double dragCoefficient = 1 / ballisticCoefficient;
-        final double velocity = muzzleVelocity * pow(0.95, range / 100); // Approximate velocity loss
-
-        // Calculate drop (simplified)
-        final double drop = 0.5 * gravity * timeOfFlight * timeOfFlight * 12; // Convert to inches
-
-        // Calculate wind drift (simplified)
-        final double windEffect = sin(windDirection * pi / 180) * windSpeed;
-        final double windDrift = windEffect * timeOfFlight * 12 * 0.1; // Convert to inches
-
-        // Calculate energy (simplified)
-        final double bulletWeight = 140; // Assume 140gr bullet if not specified
-        final double energy = (bulletWeight * velocity * velocity) / 450240; // ft-lbs
-
-        trajectoryData.add(BallisticPoint(
-          range: range,
-          drop: drop,
-          windDrift: windDrift,
-          velocity: velocity,
-          energy: energy,
-          timeOfFlight: timeOfFlight,
-        ));
-      }
-
+      final trajectoryData = models.map((model) => model.toEntity()).toList();
       return Right(trajectoryData);
     } catch (e) {
-       return Left(DatabaseFailure('Failed to calculate ballistics: $e'));
+      return Left(DatabaseFailure('Failed to calculate ballistics: $e'));
     }
   }
 }

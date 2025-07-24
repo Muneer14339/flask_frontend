@@ -1,4 +1,6 @@
 // lib/main.dart - Updated without Settings dependencies
+import 'package:http/http.dart' as http;
+
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -35,6 +37,8 @@ import 'features/auth/presentation/screens/verify_otp_screen.dart';
 
 // Loadout Firebase imports
 import 'features/loadout/data/datasources/ballistic_firebase_data_source.dart';
+import 'features/loadout/data/datasources/ballistic_http_data_source.dart';
+import 'features/loadout/data/datasources/loadout_http_data_source.dart';
 import 'features/loadout/data/repositories/ballistic_repository_impl.dart';
 import 'features/loadout/data/repositories/loadout_repository_impl.dart';
 import 'features/loadout/domain/repositories/ballistic_repository.dart';
@@ -114,6 +118,7 @@ Future<void> setupLocator() async {
     // ✅ KEEPING: Loadout Firebase dependencies (unchanged)
     await _setupLoadoutFirebaseDependencies();
 
+
     // ✅ KEEPING: Training dependencies (unchanged)
     await _setupTrainingDependencies();
 
@@ -123,6 +128,7 @@ Future<void> setupLocator() async {
     rethrow;
   }
 }
+
 
 Future<void> _setupHttpAuthDependencies() async {
   print('🌐 Setting up HTTP Auth dependencies...');
@@ -151,9 +157,10 @@ Future<void> _setupHttpAuthDependencies() async {
 
   // Google Sign In
   sl.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn(
-    scopes: ['email', 'profile'],
-    // Add your Google Client ID here for better security
-    // clientId: 'your-google-client-id.apps.googleusercontent.com',
+      scopes: ['email', 'profile'],
+      // Add your Google Client ID here for better security
+      // clientId: 'your-google-client-id.apps.googleusercontent.com',
+      clientId: "134573180968-dr8bcrgrua24vlvvf4meo81jm7e13rhs.apps.googleusercontent.com"
   ));
 
   // HTTP Auth Data Source
@@ -193,40 +200,53 @@ Future<void> _setupHttpAuthDependencies() async {
 
 Future<void> _setupLoadoutFirebaseDependencies() async {
   print('🔥 Setting up Firebase Loadout dependencies...');
+// Core dependencies
+  sl.registerLazySingleton<http.Client>(() => http.Client());
+  String getToken() {
+    final authService = sl<HttpAuthDataSource>();
+    return authService.getToken() ?? '';
+  }
 
+
+
+  // Backend URL configuration
+  const String baseUrl = 'http://192.168.1.248:5000'; // Your backend URL
   // Firebase Data Source
-  sl.registerLazySingleton<LoadoutFirebaseDataSource>(
-        () => LoadoutFirebaseDataSourceImpl(
-      firestore: sl(),
-      firebaseAuth: sl(),
+  sl.registerLazySingleton<LoadoutHttpDataSource>(
+        () => LoadoutHttpDataSourceImpl(
+      httpClient: sl<http.Client>(),
+      baseUrl: baseUrl,
+      getToken: getToken,
     ),
   );
 
   // ✅ ADD: Ballistic Firebase Data Source
-  sl.registerLazySingleton<BallisticFirebaseDataSource>(
-        () => BallisticFirebaseDataSourceImpl(
-      firestore: sl(),
-      firebaseAuth: sl(),
+  sl.registerLazySingleton<BallisticHttpDataSource>(
+        () => BallisticHttpDataSourceImpl(
+      httpClient: sl<http.Client>(),
+      baseUrl: baseUrl,
+      getToken: getToken,
     ),
   );
 
+
   // Firebase Repository
   sl.registerLazySingleton<LoadoutRepository>(
-        () => LoadoutFirebaseRepositoryImpl(
-      firebaseDataSource: sl(),
+        () => LoadoutRepositoryImpl(
+      httpDataSource: sl<LoadoutHttpDataSource>(),
     ),
   );
 
   // ✅ ADD: Ballistic Repository
   sl.registerLazySingleton<BallisticRepository>(
         () => BallisticRepositoryImpl(
-      firebaseDataSource: sl(),
+      httpDataSource: sl<BallisticHttpDataSource>(),
     ),
   );
 
   // Also register as Firebase repository for BLoC
-  sl.registerLazySingleton<LoadoutFirebaseRepositoryImpl>(
-        () => sl<LoadoutRepository>() as LoadoutFirebaseRepositoryImpl,
+  sl.registerLazySingleton<LoadoutRepositoryImpl>(
+        () => sl<LoadoutRepository>() as LoadoutRepositoryImpl,
   );
 
   // ✅ ADD: Ballistic Repository Impl for BLoC
@@ -286,9 +306,8 @@ Future<void> _setupLoadoutFirebaseDependencies() async {
     updateRifleScope: sl(),
     updateRifleAmmunition: sl(),
     updateRifle: sl(),
-    firebaseRepository: sl(),
     updateScope: sl(),
-    updateAmmunition: sl(),
+    updateAmmunition: sl(), httpRepository: sl(),
   ));
 
   // ✅ ADD: Ballistic BLoC

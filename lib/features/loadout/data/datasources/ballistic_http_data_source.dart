@@ -508,27 +508,3 @@ class BallisticHttpDataSourceImpl implements BallisticHttpDataSource {
   }
 }
 
-// Extensions for JSON conversion
-extension DopeEntryModelJson on DopeEntryModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static DopeEntryModel fromJson(Map<String, dynamic> json) => DopeEntryModel.fromFirestore(json, json['id'] ?? '');
-}
-
-extension ZeroEntryModelJson on ZeroEntryModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static ZeroEntryModel fromJson(Map<String, dynamic> json) => ZeroEntryModel.fromFirestore(json, json['id'] ?? '');
-}
-
-extension ChronographDataModelJson on ChronographDataModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static ChronographDataModel fromJson(Map<String, dynamic> json) => ChronographDataModel.fromFirestore(json, json['id'] ?? '');
-}
-
-extension BallisticCalculationModelJson on BallisticCalculationModel {
-  Map<String, dynamic> toJson() => toFirestore();
-  static BallisticCalculationModel fromJson(Map<String, dynamic> json) => BallisticCalculationModel.fromFirestore(json, json['id'] ?? '');
-}
-
-extension BallisticPointModelJson on BallisticPointModel {
-  static BallisticPointModel fromJson(Map<String, dynamic> json) => BallisticPointModel.fromMap(json);
-}

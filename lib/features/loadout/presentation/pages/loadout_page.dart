@@ -50,6 +50,7 @@ class _LoadoutPageState extends State<LoadoutPage> {
           }
 
           if (state is LoadoutError) {
+            print("Error: ${state.message}");
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

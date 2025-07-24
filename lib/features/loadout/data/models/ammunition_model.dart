@@ -1,87 +1,34 @@
-// lib/features/Loadout/data/models/ammunition_model.dart
-import 'package:hive/hive.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/features/loadout/data/models/ammunition_model.dart
 import '../../domain/entities/ammunition.dart';
 
-// part 'ammunition_model.g.dart';
-
-@HiveType(typeId: 4)
-class AmmunitionModel extends HiveObject {
-  @HiveField(0)
-  String id;
-
-  @HiveField(1)
-  String name;
-
-  @HiveField(2)
-  String manufacturer;
-
-  @HiveField(3)
-  String caliber;
-
-  @HiveField(4)
-  BulletModel bullet;
-
-  @HiveField(5)
-  String? powder;
-
-  @HiveField(6)
-  String? primer;
-
-  @HiveField(7)
-  String? brass;
-
-  @HiveField(8)
-  int? velocity;
-
-  @HiveField(9)
-  int? es;
-
-  @HiveField(10)
-  int? sd;
-
-  @HiveField(11)
-  String? lotNumber;
-
-  @HiveField(12)
-  int count;
-
-  @HiveField(13)
-  double? price;
-
-  @HiveField(14)
-  bool tempStable;
-
-  @HiveField(15)
-  String? notes;
+class AmmunitionModel {
+  final String id;
+  final String name;
+  final String manufacturer;
+  final String caliber;
+  final BulletModel bullet;
+  final String? powder;
+  final String? primer;
+  final String? brass;
+  final int? velocity;
+  final int? es;
+  final int? sd;
+  final String? lotNumber;
+  final int count;
+  final double? price;
+  final bool tempStable;
+  final String? notes;
 
   // Advanced fields
-  @HiveField(16)
-  String? cartridgeType;
-
-  @HiveField(17)
-  String? caseMaterial;
-
-  @HiveField(18)
-  String? primerType;
-
-  @HiveField(19)
-  String? pressureClass;
-
-  @HiveField(20)
-  double? sectionalDensity;
-
-  @HiveField(21)
-  double? recoilEnergy;
-
-  @HiveField(22)
-  double? powderCharge;
-
-  @HiveField(23)
-  String? powderType;
-
-  @HiveField(24)
-  int? chronographFPS;
+  final String? cartridgeType;
+  final String? caseMaterial;
+  final String? primerType;
+  final String? pressureClass;
+  final double? sectionalDensity;
+  final double? recoilEnergy;
+  final double? powderCharge;
+  final String? powderType;
+  final int? chronographFPS;
 
   AmmunitionModel({
     required this.id,
@@ -100,7 +47,6 @@ class AmmunitionModel extends HiveObject {
     this.price,
     required this.tempStable,
     this.notes,
-    // Advanced fields
     this.cartridgeType,
     this.caseMaterial,
     this.primerType,
@@ -130,7 +76,6 @@ class AmmunitionModel extends HiveObject {
       price: ammunition.price,
       tempStable: ammunition.tempStable,
       notes: ammunition.notes,
-      // Advanced fields
       cartridgeType: ammunition.cartridgeType,
       caseMaterial: ammunition.caseMaterial,
       primerType: ammunition.primerType,
@@ -143,45 +88,43 @@ class AmmunitionModel extends HiveObject {
     );
   }
 
-  // Firestore serialization methods
-  factory AmmunitionModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory AmmunitionModel.fromJson(Map<String, dynamic> json) {
     return AmmunitionModel(
-      id: data['id'] ?? id,
-      name: data['name'] ?? '',
-      manufacturer: data['manufacturer'] ?? '',
-      caliber: data['caliber'] ?? '',
-      bullet: BulletModel.fromFirestore(data['bullet'] ?? {}),
-      powder: data['powder'],
-      primer: data['primer'],
-      brass: data['brass'],
-      velocity: data['velocity'],
-      es: data['es'],
-      sd: data['sd'],
-      lotNumber: data['lotNumber'],
-      count: data['count'] ?? 0,
-      price: data['price']?.toDouble(),
-      tempStable: data['tempStable'] ?? false,
-      notes: data['notes'],
-      // Advanced fields
-      cartridgeType: data['cartridgeType'],
-      caseMaterial: data['caseMaterial'],
-      primerType: data['primerType'],
-      pressureClass: data['pressureClass'],
-      sectionalDensity: data['sectionalDensity']?.toDouble(),
-      recoilEnergy: data['recoilEnergy']?.toDouble(),
-      powderCharge: data['powderCharge']?.toDouble(),
-      powderType: data['powderType'],
-      chronographFPS: data['chronographFPS'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      manufacturer: json['manufacturer'] ?? '',
+      caliber: json['caliber'] ?? '',
+      bullet: BulletModel.fromJson(json['bullet'] ?? {}),
+      powder: json['powder'],
+      primer: json['primer'],
+      brass: json['brass'],
+      velocity: json['velocity'],
+      es: json['es'],
+      sd: json['sd'],
+      lotNumber: json['lotNumber'],
+      count: json['count'] ?? 0,
+      price: json['price']?.toDouble(),
+      tempStable: json['tempStable'] ?? false,
+      notes: json['notes'],
+      cartridgeType: json['cartridgeType'],
+      caseMaterial: json['caseMaterial'],
+      primerType: json['primerType'],
+      pressureClass: json['pressureClass'],
+      sectionalDensity: json['sectionalDensity']?.toDouble(),
+      recoilEnergy: json['recoilEnergy']?.toDouble(),
+      powderCharge: json['powderCharge']?.toDouble(),
+      powderType: json['powderType'],
+      chronographFPS: json['chronographFPS'],
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
       'manufacturer': manufacturer,
       'caliber': caliber,
-      'bullet': bullet.toFirestore(),
+      'bullet': bullet.toJson(),
       'powder': powder,
       'primer': primer,
       'brass': brass,
@@ -193,7 +136,6 @@ class AmmunitionModel extends HiveObject {
       'price': price,
       'tempStable': tempStable,
       'notes': notes,
-      // Advanced fields
       'cartridgeType': cartridgeType,
       'caseMaterial': caseMaterial,
       'primerType': primerType,
@@ -203,8 +145,6 @@ class AmmunitionModel extends HiveObject {
       'powderCharge': powderCharge,
       'powderType': powderType,
       'chronographFPS': chronographFPS,
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -226,7 +166,6 @@ class AmmunitionModel extends HiveObject {
       price: price,
       tempStable: tempStable,
       notes: notes,
-      // Advanced fields
       cartridgeType: cartridgeType,
       caseMaterial: caseMaterial,
       primerType: primerType,
@@ -240,19 +179,11 @@ class AmmunitionModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 5)
-class BulletModel extends HiveObject {
-  @HiveField(0)
-  String? weight;
-
-  @HiveField(1)
-  String? type;
-
-  @HiveField(2)
-  String? manufacturer;
-
-  @HiveField(3)
-  BallisticCoefficientModel bc;
+class BulletModel {
+  final String? weight;
+  final String? type;
+  final String? manufacturer;
+  final BallisticCoefficientModel bc;
 
   BulletModel({
     this.weight,
@@ -270,22 +201,21 @@ class BulletModel extends HiveObject {
     );
   }
 
-  // Firestore methods
-  factory BulletModel.fromFirestore(Map<String, dynamic> data) {
+  factory BulletModel.fromJson(Map<String, dynamic> json) {
     return BulletModel(
-      weight: data['weight'],
-      type: data['type'],
-      manufacturer: data['manufacturer'],
-      bc: BallisticCoefficientModel.fromFirestore(data['bc'] ?? {}),
+      weight: json['weight'],
+      type: json['type'],
+      manufacturer: json['manufacturer'],
+      bc: BallisticCoefficientModel.fromJson(json['bc'] ?? {}),
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'weight': weight,
       'type': type,
       'manufacturer': manufacturer,
-      'bc': bc.toFirestore(),
+      'bc': bc.toJson(),
     };
   }
 
@@ -299,13 +229,9 @@ class BulletModel extends HiveObject {
   }
 }
 
-@HiveType(typeId: 6)
-class BallisticCoefficientModel extends HiveObject {
-  @HiveField(0)
-  double? g1;
-
-  @HiveField(1)
-  double? g7;
+class BallisticCoefficientModel {
+  final double? g1;
+  final double? g7;
 
   BallisticCoefficientModel({
     this.g1,
@@ -319,15 +245,14 @@ class BallisticCoefficientModel extends HiveObject {
     );
   }
 
-  // Firestore methods
-  factory BallisticCoefficientModel.fromFirestore(Map<String, dynamic> data) {
+  factory BallisticCoefficientModel.fromJson(Map<String, dynamic> json) {
     return BallisticCoefficientModel(
-      g1: data['g1']?.toDouble(),
-      g7: data['g7']?.toDouble(),
+      g1: json['g1']?.toDouble(),
+      g7: json['g7']?.toDouble(),
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'g1': g1,
       'g7': g7,
