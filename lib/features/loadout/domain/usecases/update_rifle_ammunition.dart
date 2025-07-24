@@ -1,3 +1,4 @@
+// Debug version of UpdateRifleAmmunition to help troubleshoot
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -20,30 +21,58 @@ class UpdateRifleAmmunition implements UseCase<void, UpdateRifleAmmunitionParams
   @override
   Future<Either<Failure, void>> call(UpdateRifleAmmunitionParams params) async {
     try {
+      print('🔧 UpdateRifleAmmunition: Starting update for rifle ${params.rifleId}');
+      print('🔧 New ammunition: ${params.ammunition?.name ?? 'NULL (removing)'}');
+
       final riflesResult = await repository.getRifles();
 
       return riflesResult.fold(
-            (failure) => Left(failure),
+            (failure) {
+          print('❌ Failed to get rifles: $failure');
+          return Left(failure);
+        },
             (rifles) async {
           try {
             final rifle = rifles.firstWhere(
                   (r) => r.id == params.rifleId,
             );
 
-            if(params.ammunition==null){
-              final updatedRifle = rifle.copyWith(ammunition: params.ammunition, clearAmmunition: true);
-              return await repository.updateRifle(updatedRifle);
-            }else{
-              final updatedRifle = rifle.copyWith(ammunition: params.ammunition);
-              return await repository.updateRifle(updatedRifle);
+            print('✅ Found rifle: ${rifle.name}');
+            print('🔧 Current ammunition: ${rifle.ammunition?.name ?? 'None'}');
+
+            Rifle updatedRifle;
+            if (params.ammunition == null) {
+              print('🗑️ Removing ammunition from rifle');
+              updatedRifle = rifle.copyWith(ammunition: null, clearAmmunition: true);
+            } else {
+              print('🔄 Setting new ammunition: ${params.ammunition!.name}');
+              updatedRifle = rifle.copyWith(ammunition: params.ammunition);
             }
 
+            print('🔧 Updated rifle ammunition: ${updatedRifle.ammunition?.name ?? 'None'}');
+            print('📤 Sending update to repository...');
+
+            final result = await repository.updateRifle(updatedRifle);
+
+            return result.fold(
+                  (failure) {
+                print('❌ Repository update failed: $failure');
+                return Left(failure);
+              },
+                  (_) {
+                print('✅ Repository update successful!');
+                return const Right(null);
+              },
+            );
+
           } catch (e) {
+            print('❌ Rifle not found with ID: ${params.rifleId}');
             return Left(DatabaseFailure('Rifle not found with ID: ${params.rifleId}'));
           }
         },
       );
     } catch (e) {
+      print('❌ Unexpected error in UpdateRifleAmmunition: $e');
       return Left(DatabaseFailure('Failed to update rifle ammunition: $e'));
     }
   }

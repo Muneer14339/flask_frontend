@@ -1,4 +1,4 @@
-// lib/features/Loadout/domain/entities/rifle.dart
+// lib/features/loadout/domain/entities/rifle.dart
 import 'package:equatable/equatable.dart';
 import 'scope.dart';
 import 'ammunition.dart';
@@ -19,7 +19,7 @@ class Rifle extends Equatable {
   final bool isActive;
   final String? notes;
 
-  // New advanced fields
+  // Advanced fields
   final String? serialNumber;
   final String? overallLength;
   final String? weight;
@@ -47,7 +47,6 @@ class Rifle extends Equatable {
     this.ammunition,
     required this.isActive,
     this.notes,
-    // New advanced fields
     this.serialNumber,
     this.overallLength,
     this.weight,
@@ -61,6 +60,7 @@ class Rifle extends Equatable {
     this.modifications,
   });
 
+  // ✅ FIXED: Proper copyWith method with clear parameters
   Rifle copyWith({
     String? id,
     String? name,
@@ -76,7 +76,6 @@ class Rifle extends Equatable {
     Ammunition? ammunition,
     bool? isActive,
     String? notes,
-    // New advanced fields
     String? serialNumber,
     String? overallLength,
     String? weight,
@@ -88,7 +87,7 @@ class Rifle extends Equatable {
     String? sightHeight,
     String? purchaseDate,
     String? modifications,
-    // Special flags for null assignment
+    // ✅ Clear parameters for removing associations
     bool clearScope = false,
     bool clearAmmunition = false,
   }) {
@@ -103,11 +102,12 @@ class Rifle extends Equatable {
       barrel: barrel ?? this.barrel,
       action: action ?? this.action,
       stock: stock ?? this.stock,
+      // ✅ Handle scope clearing
       scope: clearScope ? null : (scope ?? this.scope),
+      // ✅ Handle ammunition clearing
       ammunition: clearAmmunition ? null : (ammunition ?? this.ammunition),
       isActive: isActive ?? this.isActive,
       notes: notes ?? this.notes,
-      // New advanced fields
       serialNumber: serialNumber ?? this.serialNumber,
       overallLength: overallLength ?? this.overallLength,
       weight: weight ?? this.weight,
@@ -138,7 +138,6 @@ class Rifle extends Equatable {
     ammunition,
     isActive,
     notes,
-    // New advanced fields
     serialNumber,
     overallLength,
     weight,
@@ -168,22 +167,6 @@ class Barrel extends Equatable {
     this.profile,
   });
 
-  Barrel copyWith({
-    String? length,
-    String? twist,
-    String? threading,
-    String? material,
-    String? profile,
-  }) {
-    return Barrel(
-      length: length ?? this.length,
-      twist: twist ?? this.twist,
-      threading: threading ?? this.threading,
-      material: material ?? this.material,
-      profile: profile ?? this.profile,
-    );
-  }
-
   @override
   List<Object?> get props => [length, twist, threading, material, profile];
 }
@@ -198,18 +181,6 @@ class RAAction extends Equatable {
     this.trigger,
     this.triggerWeight,
   });
-
-  RAAction copyWith({
-    String? type,
-    String? trigger,
-    String? triggerWeight,
-  }) {
-    return RAAction(
-      type: type ?? this.type,
-      trigger: trigger ?? this.trigger,
-      triggerWeight: triggerWeight ?? this.triggerWeight,
-    );
-  }
 
   @override
   List<Object?> get props => [type, trigger, triggerWeight];
@@ -227,20 +198,6 @@ class Stock extends Equatable {
     required this.adjustableLOP,
     required this.adjustableCheekRest,
   });
-
-  Stock copyWith({
-    String? manufacturer,
-    String? model,
-    bool? adjustableLOP,
-    bool? adjustableCheekRest,
-  }) {
-    return Stock(
-      manufacturer: manufacturer ?? this.manufacturer,
-      model: model ?? this.model,
-      adjustableLOP: adjustableLOP ?? this.adjustableLOP,
-      adjustableCheekRest: adjustableCheekRest ?? this.adjustableCheekRest,
-    );
-  }
 
   @override
   List<Object?> get props => [manufacturer, model, adjustableLOP, adjustableCheekRest];

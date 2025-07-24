@@ -132,8 +132,13 @@ class RifleModel {
       'barrel': barrel.toJson(),
       'action': action.toJson(),
       'stock': stock.toJson(),
+
+      // ✅ FIXED: Include both full objects AND IDs for backend compatibility
       'scope': scope?.toJson(),
       'ammunition': ammunition?.toJson(),
+      'scopeId': scope?.id, // ← This is what the backend needs!
+      'ammunitionId': ammunition?.id, // ← This is what the backend needs!
+
       'isActive': isActive,
       'notes': notes,
       'serialNumber': serialNumber,

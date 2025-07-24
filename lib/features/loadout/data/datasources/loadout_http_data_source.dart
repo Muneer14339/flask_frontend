@@ -110,25 +110,48 @@ class LoadoutHttpDataSourceImpl implements LoadoutHttpDataSource {
     }
   }
 
+  // Add this to your LoadoutHttpDataSourceImpl class
+
   @override
   Future<RifleModel> updateRifle(RifleModel rifle) async {
     try {
+      final jsonData = rifle.toJson();
+
+      // ✅ DEBUG: Log what we're sending
+      print('🔧 HTTP UPDATE RIFLE DEBUG:');
+      print('📤 URL: $baseUrl/api/loadout/rifles/${rifle.id}');
+      print('📤 Rifle Name: ${rifle.name}');
+      print('📤 Scope: ${rifle.scope?.manufacturer ?? 'None'} ${rifle.scope?.model ?? ''}');
+      print('📤 ScopeId: ${rifle.scope?.id ?? 'null'}');
+      print('📤 Ammunition: ${rifle.ammunition?.name ?? 'None'}');
+      print('📤 AmmunitionId: ${rifle.ammunition?.id ?? 'null'}');
+      print('📤 JSON Keys: ${jsonData.keys.toList()}');
+      print('📤 ScopeId in JSON: ${jsonData['scopeId']}');
+      print('📤 AmmunitionId in JSON: ${jsonData['ammunitionId']}');
+
       final response = await httpClient.put(
         Uri.parse('$baseUrl/api/loadout/rifles/${rifle.id}'),
         headers: _headers,
-        body: json.encode(rifle.toJson()),
+        body: json.encode(jsonData),
       );
+
+      print('📥 Response Status: ${response.statusCode}');
+      print('📥 Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         if (data['success'] == true && data['data'] != null) {
           final updatedRifle = RifleModel.fromJson(data['data']);
+          print('✅ Update successful! New scope: ${updatedRifle.scope?.manufacturer ?? 'None'}');
+          print('✅ Update successful! New ammunition: ${updatedRifle.ammunition?.name ?? 'None'}');
           _refreshRiflesStream(); // Refresh stream
           return updatedRifle;
         }
       }
+      print('❌ Unexpected response format');
       throw Exception('Failed to update rifle: ${response.body}');
     } catch (e) {
+      print('❌ HTTP updateRifle error: $e');
       throw Exception('Failed to update rifle: $e');
     }
   }
